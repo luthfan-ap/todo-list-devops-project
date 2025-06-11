@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - develop
   pull_request:
     branches:
       - master
@@ -25,18 +26,18 @@ jobs:
       with:
         node-version: '18' # IMPORTANT: Specify your Node.js version (e.g., '14', '16', '18', '20')
         cache: 'npm'
-
+        
     - name: Install dependencies for tests
       run: npm ci # Use npm ci for clean installs in CI environments
 
     - name: Run Jest tests
       run: npm test
-      
-# ===== SONARCLOUD SCANNER
 
     - name: Run tests with coverage
       run: |
         npm run test -- --coverage
+    
+# ===== SONARCLOUD SCANNER
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
@@ -45,8 +46,10 @@ jobs:
           -Dsonar.projectKey=luthfan-ap_todo-list-devops-project
           -Dsonar.organization=pso-a-kelompok-7
           -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          -Dsonar.exclusions=**/*.tf,**/*.tfvars,.terraform/**
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
 # ===== DETERMINE NEXT VERSION (untuk membuat new release version)
 
@@ -134,6 +137,7 @@ jobs:
         echo "ECR Image URI: $FULL_ECR_IMAGE_URI"
         echo "::set-output name=full_image_uri::$FULL_ECR_IMAGE_URI" # Set output for this step
 
+    
     - name: Deploy to EC2
       env:
         EC2_PEM_KEY: ${{ secrets.SSH_KEY }}
@@ -163,3 +167,87 @@ jobs:
         
         # Cleanup PEM key
         rm -f ec2.pem
+
+# Notifikasi Discord
+
+    # - name: Tandai langkah berhasil
+    #   run: echo "LAST_STEP=Build Docker Image" >> $GITHUB_ENV
+        
+    - name: Notify to Discord on success
+      if: success()
+      run: |
+        curl -H "Content-Type: application/json" \
+          -X POST \
+          -d @- ${{ secrets.DISCORD_WEBHOOK_URL }} <<EOF
+        {
+          "content": "✅ CI/CD sukses!",
+          "embeds": [
+            {
+              "title": "✅ CI/CD Berhasil",
+              "description": "Tag \`${{ steps.next_version.outputs.tag }}\` berhasil dideploy ke EC2.",
+              "color": 3066993,
+              "fields": [
+                {
+                  "name": "Commit",
+                  "value": "[${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+                },
+                {
+                  "name": "Branch",
+                  "value": "${{ github.ref_name }}"
+                },
+                {
+                  "name": "Image URI",
+                  "value": "${{ steps.set-image-uri.outputs.full_image_uri }}"
+                }
+              ],
+              "author": {
+                "name": "${{ github.actor }}",
+                "icon_url": "https://github.com/${{ github.actor }}.png"
+              },
+              "timestamp": "${{ github.event.head_commit.timestamp }}"
+            }
+          ]
+        }
+        EOF
+
+    - name: Notify to Discord on failure
+      if: failure()
+      run: |
+        curl -H "Content-Type: application/json" \
+          -X POST \
+          -d @- ${{ secrets.DISCORD_WEBHOOK_URL }} <<EOF
+        {
+          "content": "❌ CI/CD gagal!",
+          "embeds": [
+            {
+              "title": "❌ CI/CD Gagal",
+              "description": "Terjadi kesalahan saat proses CI/CD.",
+              "color": 15158332,
+              "fields": [
+                {
+                  "name": "Log",
+                  "value": "[Lihat log run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+                },
+                {
+                  "name": "Commit",
+                  "value": "[${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+                },
+                {
+                  "name": "Branch",
+                  "value": "${{ github.ref_name }}"
+                },
+                {
+                  "name": "Image URI",
+                  "value": "${{ steps.set-image-uri.outputs.full_image_uri }}"
+                }
+              ],
+              "author": {
+                "name": "${{ github.actor }}",
+                "icon_url": "https://github.com/${{ github.actor }}.png"
+              },
+              "timestamp": "${{ github.event.head_commit.timestamp }}"
+            }
+          ]
+        }
+        EOF
+
