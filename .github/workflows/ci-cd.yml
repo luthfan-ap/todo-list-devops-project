@@ -3,15 +3,15 @@ name: CI-CD Pipeline
 on:
   push:
     branches:
-      # only on push to the develop branch.
-      - develop
+      # only on push to the master branch.
+      - master
   pull_request:
     branches:
       # only on pull request to the master branch.
       - master
 
 jobs:
-  test-build-and-push:
+  ci-cd-pipeline:
     runs-on: ubuntu-latest
     outputs:
       ecr_image_uri: ${{ steps.set-image-uri.outputs.full_image_uri }}
@@ -117,7 +117,7 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
-# PUSH IMAGE TO ECR (kasih tag "latest" dan push ke AWS ECR)
+# ===== PUSH IMAGE TO ECR (kasih tag "latest" dan push ke AWS ECR)
 
     - name: Push Docker image to Amazon ECR
       id: set-image-uri
@@ -138,6 +138,7 @@ jobs:
         echo "ECR Image URI: $FULL_ECR_IMAGE_URI"
         echo "::set-output name=full_image_uri::$FULL_ECR_IMAGE_URI" # Set output for this step
 
+# ===== DEPLOYMENT TO EC2
     
     - name: Deploy to EC2
       env:
@@ -169,7 +170,7 @@ jobs:
         # Cleanup PEM key
         rm -f ec2.pem
 
-# Notifikasi Discord
+# ===== DISCORD NOTIFICATION a
 
     # - name: Tandai langkah berhasil
     #   run: echo "LAST_STEP=Build Docker Image" >> $GITHUB_ENV
@@ -194,7 +195,7 @@ jobs:
                 },
                 {
                   "name": "Branch",
-                  "value": "${{ github.ref_name }}"
+                  "value": "${{ github.head_ref || github.ref_name }}"
                 },
                 {
                   "name": "Image URI",
@@ -235,7 +236,7 @@ jobs:
                 },
                 {
                   "name": "Branch",
-                  "value": "${{ github.ref_name }}"
+                  "value":"${{ github.head_ref || github.ref_name }}"
                 },
                 {
                   "name": "Image URI",
