@@ -65,7 +65,8 @@ The service run on Docker:
 ![Dockerfile](images/dockerfile.png)
 
 The Docker build result:
-<!-- ######################################### -->
+![Docker Result](images/docker-result.png)
+
 
 ### Jest
 Jest is a popular testing framework for JavaScript applications, primarily used for unit, integration, and end-to-end (E2E) testing in applications built with React, Node.js, and other JavaScript frameworks. Jest was developed by Facebook and is known for its ease of use and advanced features that simplify the testing process.
@@ -82,13 +83,14 @@ Our Jest testing result:
 SonarCloud is a cloud-based SonarQube service used to automatically analyze source code to detect bugs, security vulnerabilities, and improve code quality. By using SonarCloud, our team will receive analytical information about our code quality, as well as suggestions, warnings, and alerts for any errors or bugs in our code.
 
 Here is our SonarCloud analysis result: 
-<!-- BELOMMMMMMMMMMMMM MAU COBA HASIL YANG NGGA 0 -->
+![SonarCloud Result](images/sonarcloud-result.png)
+![SonarCloud Result](images/sonarcloud-result-2.png)
 
 ### Firebase
 Firebase is a service provided by Google used as a NoSQL database storage. The Firebase features used are Authentication (Login and Register) and Firestore Database (to record the to-do lists for each account).
 
 Firebase Authentication
-<!-- BELOMMMMMMMMMMMMM -->
+![Firebase Authentication](images/firebase-auth.png)
 
 Firestore Database
 <!-- BELOMMMMMMMMMMMMM -->
