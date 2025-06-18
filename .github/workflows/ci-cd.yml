@@ -172,8 +172,6 @@ jobs:
 
 # ===== DISCORD NOTIFICATION a
 
-    # - name: Tandai langkah berhasil
-    #   run: echo "LAST_STEP=Build Docker Image" >> $GITHUB_ENV
         
     - name: Notify to Discord on success
       if: success()
