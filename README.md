@@ -922,3 +922,4 @@ Our CI/CD pipeline is automatically triggered by several specific events in the 
     * Cloudwatch will show instance performance dashboard.
 * **Discord Notification:**
     * Discord Notification will be triggered either when the CI/CD Pipeline returns a success or a failure.
+
